@@ -63,5 +63,17 @@ export class FreeStaticIpStack extends cdk.Stack {
         value: eip.attrPublicIp,
       });
     });
+
+
+    // prevent the lambda function from losing its ENI
+    // If your lambda has side effects, make sure you early return when it's triggered by this rule
+    new cdk.aws_events.Rule(this, "LambdaWeeklyTriggerRule", {
+      schedule: cdk.aws_events.Schedule.cron({
+        minute: "0",
+        hour: "10",
+        weekDay: "SUN,WED",
+      }),
+      targets: [new cdk.aws_events_targets.LambdaFunction(func)],
+    });
   }
 }
